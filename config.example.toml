@@ -1,0 +1,97 @@
+# relay-code configuration example.
+#
+# Hosted providers require a real account and API key. They may charge money.
+# For a no-hosted-fee setup use Ollama below and keep both roles local.
+#
+# Credentials are read from environment variables named here. Never paste keys
+# into this file or commit it.
+
+[harness]
+# Absolute path outside the project. Defaults to the platform state directory.
+# sessions_dir = "/Users/you/.local/state/relay"
+max_repairs = 2
+max_planner_calls = 10
+max_executor_calls = 40
+max_tool_calls = 80
+max_model_tokens = 500000
+max_context_tokens = 200000
+max_read_bytes = 262144
+max_tool_output_bytes = 24576
+# Environment variables whose values are redacted from outbound tool results,
+# persisted events and diagnostics.
+redact_env = []
+
+[docker]
+# docker, podman or nerdctl. The binary must be on a fixed PATH.
+runtime = "docker"
+memory_mb = 2048
+cpus = "2"
+pids_limit = 256
+output_limit_bytes = 1048576
+tmpfs_mb = 256
+
+[roles.planner]
+# Read-only planning tier.
+provider = "ollama"
+model = "qwen2.5-coder:7b"
+max_tokens = 4096
+temperature = 0.2
+
+[roles.executor]
+# Staged-workspace execution tier.
+provider = "ollama"
+model = "qwen2.5-coder:7b"
+max_tokens = 4096
+temperature = 0.2
+
+[providers.ollama]
+base_url = "http://localhost:11434"
+timeout_secs = 300
+
+# --- Hosted providers (optional) -------------------------------------------
+# Uncomment, set the environment variable in your shell, and accept that API
+# usage may be billed by the provider.
+#
+# [providers.cohere]
+# api_key_env = "COHERE_API_KEY"
+# timeout_secs = 120
+#
+# [providers.openai]
+# api_key_env = "OPENAI_API_KEY"
+# timeout_secs = 120
+#
+# [providers.anthropic]
+# api_key_env = "ANTHROPIC_API_KEY"
+# timeout_secs = 120
+#
+# [providers.compatible]
+# # Any OpenAI-compatible endpoint. Credentials are optional for local servers.
+# base_url = "https://example.invalid/v1"
+# api_key_env = "COMPATIBLE_API_KEY"
+# # Required before sending a key to a non-default endpoint.
+# trust_custom_endpoint = true
+
+# --- Deterministic evaluation ----------------------------------------------
+# Tests run only inside the container. Pull the image yourself first; relay
+# never pulls images implicitly. Network is disabled unless allow_network=true
+# and you approve the policy interactively.
+
+[[tests]]
+name = "cargo-test"
+image = "rust:1.88-bookworm"
+command = ["cargo", "test", "--all-targets"]
+cwd = "."
+timeout_secs = 900
+allow_network = false
+
+# Dependency preparation is optional and separately approved. It may use the
+# network only when prepare_allow_network = true. It must not modify reviewed
+# source files; relay verifies their hashes afterwards.
+# [[tests]]
+# name = "node-test"
+# image = "node:22-bookworm"
+# command = ["npm", "test"]
+# cwd = "."
+# timeout_secs = 900
+# prepare_command = ["npm", "ci", "--ignore-scripts"]
+# prepare_allow_network = true

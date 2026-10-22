@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(rustc:*)",
+      "Shell(cargo:*)",
+      "Shell(docker:*)",
+      "Shell(git:*)",
+      "Shell(env | grep -Ei 'cargo|rust|ssl|proxy|cert' | sort; ls -l /etc/ssl/cert.pem; ls -l /etc/ssl/certs 2>/dev/null | head; cat ~/.cargo/config.toml 2>/dev/null; cat ~/.cargo/config 2>/dev/null; ls ~/.cargo/registry/cache 2>/dev/null | head)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
